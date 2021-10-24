@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "378953744917",
+    "firebase_url": "https://dispatcher-app-2fc83-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "dispatcher-app-2fc83",
+    "storage_bucket": "dispatcher-app-2fc83.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:378953744917:android:98309a5131ba1f1b2f041c",
+        "android_client_info": {
+          "package_name": "com.example.dispatcher_app_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "378953744917-aq5rqpnnm12kkf5oloaqa2cfvsp7ko1h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7tPJHl9EmYNMCKs65Dnj5uNiCPpVd7Gs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "378953744917-aq5rqpnnm12kkf5oloaqa2cfvsp7ko1h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
