@@ -3,11 +3,9 @@ package com.example.dispatcher_app_mobile;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -25,7 +23,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -33,8 +30,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessaging;
-//import com.google.android.gms.location.FusedLocationProviderClient;
-//import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,12 +40,11 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements LocationListener{
 
     Button btn;
-    TextView text, after;
+    TextView text;
     EditText edit;
 
     String myTeamId;
 
-    //location
     LocationManager lm;
     Criteria cr;
     Location location;
@@ -69,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
         btn = findViewById(R.id.button);
         text = findViewById(R.id.textView2);
-        after = findViewById(R.id.afterText);
         edit = findViewById(R.id.editText);
 
         teamLocation = new Double[2];
@@ -85,23 +78,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                             Log.w(TAG, "Fetching FCM registration token failed", task.getException());
                             return;
                         }
-
-                        // Get new FCM registration token
                         token = task.getResult();
-
-                        // Log and toast
-//                        String msg = getString(R.string.msg_token_fmt, token);
-//                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
                     }
                 });
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 myTeamId = edit.getText().toString();
-                rootNode = FirebaseDatabase.getInstance();
-                reference = rootNode.getReference("teams");
-                reference.child(myTeamId).setValue(myTeamId);
 
                 JSONObject object = new JSONObject();
                 try {
@@ -121,8 +106,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, object, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-//                        text2.setText("posted!");
-                        setContentView(R.layout.after_login);
+                        Intent mainIntent = new Intent(MainActivity.this, AfterLogIn.class);
+                        mainIntent.putExtra("teamId", myTeamId);
+                        MainActivity.this.startActivity(mainIntent);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -137,9 +123,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         });
 
 
-        if(myTeamId != null){
-            after.setText("Welcome " + myTeamId.toString());
-        }
     }
 
     private void setLocation() {

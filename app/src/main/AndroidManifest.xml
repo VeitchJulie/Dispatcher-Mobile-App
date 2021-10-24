@@ -16,17 +16,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dispatcherappmobile"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity"
-            android:exported = "true">
+        <activity android:name=".AfterLogIn"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".PushNotificationService" android:exported="false">
+
+        <service
+            android:name=".PushNotificationService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"></action>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
     </application>
