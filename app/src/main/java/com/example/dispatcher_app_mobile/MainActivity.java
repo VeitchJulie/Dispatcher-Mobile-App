@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 });
 
                 queue.add(request);
-//                after.setText("Welcome " + myTeamId);
             }
         });
 
@@ -148,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         JSONObject object = new JSONObject();
         try {
             object.put("id", myTeamId);
-            object.put("state", "Free");
+            object.put("token", token);
+            object.put("state", "Busy");
             object.put("lat",teamLocation[0]);
             object.put("long", teamLocation[1]);
             object.put("endLat", "0.000000000000000000000000000000");

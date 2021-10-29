@@ -13,15 +13,17 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class AfterLogIn extends AppCompatActivity {
 
-    TextView welcomeText;
+    TextView welcomeText, caseList;
     Button logOutButton;
     String myTeamId;
 
@@ -33,9 +35,26 @@ public class AfterLogIn extends AppCompatActivity {
         myTeamId = intent.getStringExtra("teamId");
 
         welcomeText = findViewById(R.id.welcomeText);
+        caseList = findViewById(R.id.textView3);
         welcomeText.setText("Welcome " + myTeamId);
 
         logOutButton = findViewById(R.id.logOutButton);
+
+        RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
+        String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/cases/";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,null,  new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                caseList.setText(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                caseList.setText(error.getMessage());
+            }
+        });
+
+        queue.add(request);
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,6 +62,7 @@ public class AfterLogIn extends AppCompatActivity {
                 JSONObject dummyObject = new JSONObject();
                 try {
                     dummyObject.put("id", myTeamId);
+                    dummyObject.put("token", "token");
                     dummyObject.put("token", "token");
                     dummyObject.put("state", "Free");
                     dummyObject.put("lat",0);
