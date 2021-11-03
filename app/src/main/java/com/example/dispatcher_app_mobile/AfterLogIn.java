@@ -2,11 +2,14 @@ package com.example.dispatcher_app_mobile;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.List;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -16,6 +19,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,38 +28,33 @@ import org.json.JSONObject;
 
 public class AfterLogIn extends AppCompatActivity {
 
+    public static AfterLogIn INSTANCE;
     TextView welcomeText, caseList;
     Button logOutButton;
-    String myTeamId;
+    LinearLayout linearLayout;
+    String myTeamId, request;
+    protected static Boolean isCase = false;
+    String[] teamCases;
+
+    private static final String TAG = "AfterLogin";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_after_log_in);
+
+        INSTANCE = this;
         Intent intent = getIntent();
         myTeamId = intent.getStringExtra("teamId");
-
+        request = intent.getStringExtra("case");
         welcomeText = findViewById(R.id.welcomeText);
-        caseList = findViewById(R.id.textView3);
+//        caseList = findViewById(R.id.caseList);
         welcomeText.setText("Welcome " + myTeamId);
 
         logOutButton = findViewById(R.id.logOutButton);
+        linearLayout = findViewById(R.id.linear);
 
-        RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
-        String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/cases/";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,null,  new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                caseList.setText(response.toString());
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                caseList.setText(error.getMessage());
-            }
-        });
-
-        queue.add(request);
+//        caseList.setText(request);
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,5 +96,45 @@ public class AfterLogIn extends AppCompatActivity {
                 queue.add(request);
             }
         });
+    }
+
+    public static AfterLogIn get(){
+        return INSTANCE;
+    }
+
+    public void getCaseList(){
+
+        RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
+        String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/cases/";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,null,  new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                GsonBuilder builder = new GsonBuilder();
+                builder.setPrettyPrinting();
+                Gson gson = builder.create();
+
+                Team team = gson.fromJson(response.toString(), Team.class);
+                setCaseList(team.getCases());
+//                caseList.setText(String.valueOf(team.getCases().length));
+//
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i(TAG, "error");
+            }
+        });
+
+        queue.add(request);
+    }
+
+    public void setCaseList(Case[] cases){
+        linearLayout.removeAllViews();
+        for(int i = 0; i<cases.length; i++){
+            TextView textView = new TextView(this);
+            textView.setText(cases[i].toString());
+            linearLayout.addView(textView);
+        }
     }
 }
