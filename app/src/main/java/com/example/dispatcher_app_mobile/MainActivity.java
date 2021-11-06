@@ -39,6 +39,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements LocationListener{
 
+    public static MainActivity INSTANCE;
+
     Button btn;
     TextView text;
     EditText edit;
@@ -146,20 +148,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private void updateApi(){
         JSONObject object = new JSONObject();
         try {
-            object.put("id", myTeamId);
-            object.put("token", token);
-            object.put("state", "Busy");
             object.put("lat",teamLocation[0]);
             object.put("long", teamLocation[1]);
-            object.put("endLat", "0.000000000000000000000000000000");
-            object.put("endLong", "0.000000000000000000000000000000");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
         String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, object, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, object, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
 //                text.setText("posted!");
@@ -195,5 +192,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 //        text2.setText("disabled ");
     }
 
+    public static MainActivity get(){
+        return INSTANCE;
+    }
 
+    public Double[] getTeamLocation() {
+        return teamLocation;
+    }
+
+    public String getToken() {
+        return token;
+    }
 }

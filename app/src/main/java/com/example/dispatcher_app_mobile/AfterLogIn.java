@@ -1,11 +1,14 @@
 package com.example.dispatcher_app_mobile;
 
+import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.Button;
@@ -29,12 +32,21 @@ import org.json.JSONObject;
 public class AfterLogIn extends AppCompatActivity {
 
     public static AfterLogIn INSTANCE;
-    TextView welcomeText, caseList;
-    Button logOutButton;
-    LinearLayout linearLayout;
+    TextView welcomeText, caseList, newTextView, newCaseTextView;
+    Button logOutButton, acceptButton, endButton;
+    LinearLayout linearLayoutPast, linearLayoutNew;
     String myTeamId, request;
     protected static Boolean isCase = false;
+    Team team;
+    Case currCase;
     String[] teamCases;
+    MainActivity mainActivity = MainActivity.get();
+    Double[] caseLocation;
+//    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+//            LinearLayout.LayoutParams.WRAP_CONTENT,
+//            LinearLayout.LayoutParams.WRAP_CONTENT
+//    );
+//    params.setMargins(0,10,0,0);
 
     private static final String TAG = "AfterLogin";
 
@@ -48,13 +60,79 @@ public class AfterLogIn extends AppCompatActivity {
         myTeamId = intent.getStringExtra("teamId");
         request = intent.getStringExtra("case");
         welcomeText = findViewById(R.id.welcomeText);
+        newTextView = findViewById(R.id.newTextView);
+        newCaseTextView = findViewById(R.id.newCaseTextView);
 //        caseList = findViewById(R.id.caseList);
         welcomeText.setText("Welcome " + myTeamId);
-
+        caseLocation = new Double[2];
         logOutButton = findViewById(R.id.logOutButton);
-        linearLayout = findViewById(R.id.linear);
+        acceptButton = findViewById(R.id.acceptButton);
+        endButton = findViewById(R.id.endButton);
+        linearLayoutPast = findViewById(R.id.linearPast);
+        linearLayoutNew = findViewById(R.id.linearNew);
 
-//        caseList.setText(request);
+        acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject object = new JSONObject();
+                try {
+                    object.put("state", "Busy");
+                    object.put("endLat", caseLocation[0]);
+                    object.put("endLong", caseLocation[1]);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
+                String url = "http://10.0.2.2:8000/teams/"+myTeamId + "/";
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, object, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        newTextView.setText("Ongoing");
+                        acceptButton.setVisibility(View.INVISIBLE);
+                        endButton.setVisibility(View.VISIBLE);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i(TAG, "Error");
+                    }
+                });
+
+                queue.add(request);
+            }
+        });
+
+        endButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject object = new JSONObject();
+                try {
+                    object.put("state", "Free");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
+                String url = "http://10.0.2.2:8000/teams/"+myTeamId + "/";
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, object, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        newTextView.setText("New Cases");
+                        newCaseTextView.setText("No new cases right now");
+                        acceptButton.setVisibility(View.INVISIBLE);
+                        endButton.setVisibility(View.INVISIBLE);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i(TAG, "Error");
+                    }
+                });
+
+                queue.add(request);
+            }
+        });
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,13 +140,6 @@ public class AfterLogIn extends AppCompatActivity {
                 JSONObject dummyObject = new JSONObject();
                 try {
                     dummyObject.put("id", myTeamId);
-                    dummyObject.put("token", "token");
-                    dummyObject.put("token", "token");
-                    dummyObject.put("state", "Free");
-                    dummyObject.put("lat",0);
-                    dummyObject.put("long", 0);
-                    dummyObject.put("endLat", "0.000000000000000000000000000000");
-                    dummyObject.put("endLong", "0.000000000000000000000000000000");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -103,7 +174,6 @@ public class AfterLogIn extends AppCompatActivity {
     }
 
     public void getCaseList(){
-
         RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
         String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/cases/";
 
@@ -114,10 +184,14 @@ public class AfterLogIn extends AppCompatActivity {
                 builder.setPrettyPrinting();
                 Gson gson = builder.create();
 
-                Team team = gson.fromJson(response.toString(), Team.class);
+                team = gson.fromJson(response.toString(), Team.class);
+//                int lastCaseId = team.getCases()[team.getCases().length - 1].getId();
+                acceptButton.setVisibility(View.VISIBLE);
+                currCase = team.getCase((team.getCases().length - 1));
+                newCaseTextView.setText("Name: " + currCase.getName() + "\nPhone: " + currCase.getPhone() + "\nExtra Information: " + currCase.getExtra_information());
+                caseLocation[0] = currCase.getLat();
+                caseLocation[1] = currCase.getLng();
                 setCaseList(team.getCases());
-//                caseList.setText(String.valueOf(team.getCases().length));
-//
             }
         }, new Response.ErrorListener() {
             @Override
@@ -130,11 +204,16 @@ public class AfterLogIn extends AppCompatActivity {
     }
 
     public void setCaseList(Case[] cases){
-        linearLayout.removeAllViews();
+        linearLayoutPast.removeAllViews();
         for(int i = 0; i<cases.length; i++){
-            TextView textView = new TextView(this);
-            textView.setText(cases[i].toString());
-            linearLayout.addView(textView);
+//            if(cases[i].getState().equals("PAST")){
+                TextView textView = new TextView(this);
+                textView.setBackgroundResource(R.drawable.text_border);
+                textView.setTextSize(24);
+                textView.setGravity(Gravity.CENTER);
+                textView.setText(String.valueOf(cases[i].getId()));
+                linearLayoutPast.addView(textView);
+//            }
         }
     }
 }

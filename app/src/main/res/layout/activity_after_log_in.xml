@@ -8,17 +8,76 @@
 
     <TextView
         android:id="@+id/welcomeText"
-        android:layout_width="250dp"
-        android:layout_height="60dp"
+        android:layout_width="252dp"
+        android:layout_height="43dp"
         android:text="Welcome"
         android:textAlignment="center"
         android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.176"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.16" />
+        app:layout_constraintVertical_bias="0.03" />
+
+    <TextView
+        android:id="@+id/newTextView"
+        android:layout_width="360dp"
+        android:layout_height="42dp"
+        android:text="New Cases"
+        android:textSize="28dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.509"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.121" />
+
+    <LinearLayout
+        android:id="@+id/linearNew"
+        android:layout_width="354dp"
+        android:layout_height="177dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/pastTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/newTextView"
+        app:layout_constraintVertical_bias="0.0">
+
+        <TextView
+            android:id="@+id/newCaseTextView"
+            android:layout_width="fill_parent"
+            android:layout_height="125dp"
+            android:text="No new cases right now"
+            android:textAlignment="center"
+            android:textSize="20dp" />
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/acceptButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginRight="8dp"
+                android:text="Accept"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/endButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="End"
+                android:visibility="invisible" />
+
+        </FrameLayout>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/logOutButton"
@@ -30,35 +89,38 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/linearPast"
+        android:layout_width="361dp"
+        android:layout_height="234dp"
+        android:layout_marginBottom="32dp"
+        android:orientation="vertical"
+        android:scrollIndicators="right"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.549"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pastTextView"
+        app:layout_constraintVertical_bias="0.807">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="50dp" />
+
+    </LinearLayout>
+
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/pastTextView"
         android:layout_width="360dp"
         android:layout_height="42dp"
-        android:text="Ongoing cases"
+        android:text="Past cases"
         android:textSize="28dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintHorizontal_bias="0.549"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.306" />
-
-    <LinearLayout
-        android:id="@+id/linear"
-        android:layout_width="358dp"
-        android:layout_height="402dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.509"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView1"
-        app:layout_constraintVertical_bias="0.342">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="50dp" />
-    </LinearLayout>
-
+        app:layout_constraintVertical_bias="0.529" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

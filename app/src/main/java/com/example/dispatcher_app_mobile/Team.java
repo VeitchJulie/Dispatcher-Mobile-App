@@ -14,4 +14,8 @@ public class Team {
     public Case[] getCases() {
         return cases;
     }
+
+    public Case getCase(int id) {
+        return cases[id];
+    }
 }
