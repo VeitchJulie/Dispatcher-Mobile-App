@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                     @Override
                     public void onResponse(JSONObject response) {
                         Intent mainIntent = new Intent(MainActivity.this, AfterLogIn.class);
-                        mainIntent.putExtra("teamId", myTeamId);
+                        mainIntent.putExtra("myTeamId", myTeamId);
                         MainActivity.this.startActivity(mainIntent);
                     }
                 }, new Response.ErrorListener() {

@@ -17,9 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dispatcherappmobile"
         android:usesCleartextTraffic="true">
-        <activity android:name=".AfterLogIn">
-
-        </activity>
+        <activity android:name=".History"></activity>
+        <activity android:name=".AfterLogIn"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

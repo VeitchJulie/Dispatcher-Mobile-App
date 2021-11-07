@@ -12,6 +12,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,7 +34,8 @@ public class AfterLogIn extends AppCompatActivity {
 
     public static AfterLogIn INSTANCE;
     TextView welcomeText, caseList, newTextView, newCaseTextView;
-    Button logOutButton, acceptButton, endButton;
+    ImageButton logOutButton, historyButton;
+    Button acceptButton, endButton;
     LinearLayout linearLayoutPast, linearLayoutNew;
     String myTeamId, request;
     protected static Boolean isCase = false;
@@ -42,11 +44,6 @@ public class AfterLogIn extends AppCompatActivity {
     String[] teamCases;
     MainActivity mainActivity = MainActivity.get();
     Double[] caseLocation;
-//    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-//            LinearLayout.LayoutParams.WRAP_CONTENT,
-//            LinearLayout.LayoutParams.WRAP_CONTENT
-//    );
-//    params.setMargins(0,10,0,0);
 
     private static final String TAG = "AfterLogin";
 
@@ -57,8 +54,7 @@ public class AfterLogIn extends AppCompatActivity {
 
         INSTANCE = this;
         Intent intent = getIntent();
-        myTeamId = intent.getStringExtra("teamId");
-        request = intent.getStringExtra("case");
+        myTeamId = intent.getStringExtra("myTeamId");
         welcomeText = findViewById(R.id.welcomeText);
         newTextView = findViewById(R.id.newTextView);
         newCaseTextView = findViewById(R.id.newCaseTextView);
@@ -67,6 +63,7 @@ public class AfterLogIn extends AppCompatActivity {
         caseLocation = new Double[2];
         logOutButton = findViewById(R.id.logOutButton);
         acceptButton = findViewById(R.id.acceptButton);
+        historyButton = findViewById(R.id.historyButton);
         endButton = findViewById(R.id.endButton);
         linearLayoutPast = findViewById(R.id.linearPast);
         linearLayoutNew = findViewById(R.id.linearNew);
@@ -134,19 +131,28 @@ public class AfterLogIn extends AppCompatActivity {
             }
         });
 
+        historyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mainIntent = new Intent(AfterLogIn.this, History.class);
+                mainIntent.putExtra("myTeamId", myTeamId);
+                AfterLogIn.this.startActivity(mainIntent);
+            }
+        });
+
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject dummyObject = new JSONObject();
-                try {
-                    dummyObject.put("id", myTeamId);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+//                JSONObject dummyObject = new JSONObject();
+//                try {
+//                    dummyObject.put("id", myTeamId);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
 
                 RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
-                String url = "http://10.0.2.2:8000/teams/"+myTeamId + "/";
-                JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, dummyObject, new Response.Listener<JSONObject>() {
+                String url = "http://10.0.2.2:8000/teams/"+ myTeamId + "/";
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         Intent mainIntent = new Intent(AfterLogIn.this, MainActivity.class);
@@ -185,10 +191,11 @@ public class AfterLogIn extends AppCompatActivity {
                 Gson gson = builder.create();
 
                 team = gson.fromJson(response.toString(), Team.class);
-//                int lastCaseId = team.getCases()[team.getCases().length - 1].getId();
                 acceptButton.setVisibility(View.VISIBLE);
                 currCase = team.getCase((team.getCases().length - 1));
-                newCaseTextView.setText("Name: " + currCase.getName() + "\nPhone: " + currCase.getPhone() + "\nExtra Information: " + currCase.getExtra_information());
+                newCaseTextView.setText("Name: " + currCase.getName() +
+                        "\nPhone: " + currCase.getPhone() +
+                        "\nExtra Information: " + currCase.getExtra_information());
                 caseLocation[0] = currCase.getLat();
                 caseLocation[1] = currCase.getLng();
                 setCaseList(team.getCases());
