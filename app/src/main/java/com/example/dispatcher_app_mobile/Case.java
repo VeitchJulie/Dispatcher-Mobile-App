@@ -4,7 +4,7 @@ import com.android.volley.toolbox.StringRequest;
 
 public class Case {
     int id;
-    String state, name, phone, extra_information;
+    String state, name, phone, extraInformation;
     Double lat, lng;
 
     @Override
@@ -14,7 +14,7 @@ public class Case {
                 ", state='" + state + '\'' +
                 ", name='" + name + '\'' +
                 ", phone='" + phone + '\'' +
-                ", extra_information='" + extra_information + '\'' +
+                ", extra_information='" + extraInformation + '\'' +
                 ", lat=" + lat +
                 ", lng=" + lng +
                 '}';
@@ -45,6 +45,6 @@ public class Case {
     }
 
     public String getExtra_information() {
-        return extra_information;
+        return extraInformation;
     }
 }

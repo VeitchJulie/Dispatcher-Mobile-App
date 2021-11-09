@@ -63,7 +63,7 @@ public class PushNotificationService extends FirebaseMessagingService {
         NotificationManagerCompat.from(this).notify(1, notification.build());
         super.onMessageReceived(remoteMessage);
 
-        afterLogIn.getCaseList();
+        afterLogIn.getCaseList(false);
 
     }
 }

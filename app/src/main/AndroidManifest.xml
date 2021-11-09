@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dispatcherappmobile"
         android:usesCleartextTraffic="true">
-        <activity android:name=".History"></activity>
+        <activity android:name=".PastCases"></activity>
         <activity android:name=".AfterLogIn"></activity>
         <activity
             android:name=".MainActivity"

@@ -20,10 +20,9 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-public class History extends AppCompatActivity {
+public class PastCases extends AppCompatActivity {
 
     private static final String TAG = "History";
     Team team;
@@ -44,8 +43,8 @@ public class History extends AppCompatActivity {
 
         pastCasesText.setText("Past Cases for " + myTeamId);
 
-        RequestQueue queue = Volley.newRequestQueue(History.this);
-        String url = "http://10.0.2.2:8000/teams/" + 1111 + "/cases/";
+        RequestQueue queue = Volley.newRequestQueue(PastCases.this);
+        String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/cases/";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,null,  new Response.Listener<JSONObject>() {
             @Override
@@ -56,15 +55,24 @@ public class History extends AppCompatActivity {
 
                 team = gson.fromJson(response.toString(), Team.class);
                 linearLayout.removeAllViews();
-                for(int i = 0; i<team.getCases().length; i++){
-//            if(cases[i].getState().equals("PAST")){
-                    TextView textView = new TextView(History.this);
-                    textView.setBackgroundResource(R.drawable.text_border);
+                if(team.getCases().length <= 0){
+                    TextView textView = new TextView(PastCases.this);
                     textView.setTextSize(24);
                     textView.setGravity(Gravity.CENTER);
-                    textView.setText(String.valueOf(team.getCases()[i].getId()));
+                    textView.setText("No past cases");
                     linearLayout.addView(textView);
+                }else{
+                    for(int i = 0; i<team.getCases().length; i++){
+//                        if(cases[i].getState().equals("PAST")){
+                        TextView textView = new TextView(PastCases.this);
+                        textView.setBackgroundResource(R.drawable.text_border);
+                        textView.setTextSize(24);
+                        textView.setGravity(Gravity.CENTER);
+                        textView.setText(String.valueOf(team.getCases()[i].getId()));
+                        linearLayout.addView(textView);
+                    }
                 }
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -80,9 +88,9 @@ public class History extends AppCompatActivity {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mainIntent = new Intent(History.this, AfterLogIn.class);
+                Intent mainIntent = new Intent(PastCases.this, AfterLogIn.class);
                 mainIntent.putExtra("myTeamId", myTeamId);
-                History.this.startActivity(mainIntent);
+                PastCases.this.startActivity(mainIntent);
             }
         });
 

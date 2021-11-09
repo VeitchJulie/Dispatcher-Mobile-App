@@ -1,16 +1,12 @@
 package com.example.dispatcher_app_mobile;
 
-import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.List;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -20,13 +16,11 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -68,6 +62,8 @@ public class AfterLogIn extends AppCompatActivity {
         linearLayoutPast = findViewById(R.id.linearPast);
         linearLayoutNew = findViewById(R.id.linearNew);
 
+        getCaseList(true);
+
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,22 +99,43 @@ public class AfterLogIn extends AppCompatActivity {
         endButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject object = new JSONObject();
+                JSONObject TeamObject = new JSONObject();
                 try {
-                    object.put("state", "Free");
+                    TeamObject.put("state", "Free");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
                 RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
                 String url = "http://10.0.2.2:8000/teams/"+myTeamId + "/";
-                JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, object, new Response.Listener<JSONObject>() {
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, TeamObject, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        newTextView.setText("New Cases");
-                        newCaseTextView.setText("No new cases right now");
-                        acceptButton.setVisibility(View.INVISIBLE);
-                        endButton.setVisibility(View.INVISIBLE);
+                        JSONObject CaseObject = new JSONObject();
+                        try {
+                            CaseObject.put("state", "PAST");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        RequestQueue caseQueue = Volley.newRequestQueue(AfterLogIn.this);
+                        String caseUrl = "http://10.0.2.2:8000/cases/"+currCase.getId() + "/";
+                        JsonObjectRequest caseRequest = new JsonObjectRequest(Request.Method.PATCH, caseUrl, CaseObject, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                newTextView.setText("New Cases");
+                                newCaseTextView.setText("No new cases right now");
+                                acceptButton.setVisibility(View.INVISIBLE);
+                                endButton.setVisibility(View.INVISIBLE);
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.i(TAG, "Error");
+                            }
+                        });
+
+                        caseQueue.add(caseRequest);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -134,9 +151,9 @@ public class AfterLogIn extends AppCompatActivity {
         historyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mainIntent = new Intent(AfterLogIn.this, History.class);
-                mainIntent.putExtra("myTeamId", myTeamId);
-                AfterLogIn.this.startActivity(mainIntent);
+                Intent intent = new Intent(AfterLogIn.this, PastCases.class);
+                intent.putExtra("myTeamId", myTeamId);
+                AfterLogIn.this.startActivity(intent);
             }
         });
 
@@ -146,6 +163,12 @@ public class AfterLogIn extends AppCompatActivity {
 //                JSONObject dummyObject = new JSONObject();
 //                try {
 //                    dummyObject.put("id", myTeamId);
+//                    dummyObject.put("token", "token");
+//                    dummyObject.put("state", "Free");
+//                    dummyObject.put("lat", "0.000000000000000000000000000000");
+//                    dummyObject.put("long", "0.000000000000000000000000000000");
+//                    dummyObject.put("endLat", "0.000000000000000000000000000000");
+//                    dummyObject.put("endLong", "0.000000000000000000000000000000");
 //                } catch (JSONException e) {
 //                    e.printStackTrace();
 //                }
@@ -161,7 +184,7 @@ public class AfterLogIn extends AppCompatActivity {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if(error.networkResponse.statusCode == 204){
+                        if(error.networkResponse == null){
                             Intent mainIntent = new Intent(AfterLogIn.this, MainActivity.class);
                             AfterLogIn.this.startActivity(mainIntent);
                         }else {
@@ -179,26 +202,40 @@ public class AfterLogIn extends AppCompatActivity {
         return INSTANCE;
     }
 
-    public void getCaseList(){
+    public void getCaseList(boolean isOnCreate){
         RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
         String url = "http://10.0.2.2:8000/teams/" + myTeamId + "/cases/";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,null,  new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+
                 GsonBuilder builder = new GsonBuilder();
                 builder.setPrettyPrinting();
                 Gson gson = builder.create();
 
                 team = gson.fromJson(response.toString(), Team.class);
-                acceptButton.setVisibility(View.VISIBLE);
-                currCase = team.getCase((team.getCases().length - 1));
-                newCaseTextView.setText("Name: " + currCase.getName() +
-                        "\nPhone: " + currCase.getPhone() +
-                        "\nExtra Information: " + currCase.getExtra_information());
-                caseLocation[0] = currCase.getLat();
-                caseLocation[1] = currCase.getLng();
-                setCaseList(team.getCases());
+
+                if(isOnCreate == false) {
+                    acceptButton.setVisibility(View.VISIBLE);
+                    currCase = team.getCase((team.getCases().length - 1));
+                    newCaseTextView.setText("Name: " + currCase.getName() +
+                            "\nPhone: " + currCase.getPhone() +
+                            "\nExtra Information: " + currCase.getExtra_information());
+                    caseLocation[0] = currCase.getLat();
+                    caseLocation[1] = currCase.getLng();
+//                    setCaseList(team.getCases());
+                }else if(isOnCreate == true && team.getCases().length >= 1){
+                    currCase = team.getCase((team.getCases().length - 1));
+                    if(currCase.getState().equals("ONGOING")){
+                        newCaseTextView.setText("Name: " + currCase.getName() +
+                                "\nPhone: " + currCase.getPhone() +
+                                "\nExtra Information: " + currCase.getExtra_information());
+                        caseLocation[0] = currCase.getLat();
+                        caseLocation[1] = currCase.getLng();
+                        endButton.setVisibility(View.VISIBLE);
+                    }
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -210,17 +247,17 @@ public class AfterLogIn extends AppCompatActivity {
         queue.add(request);
     }
 
-    public void setCaseList(Case[] cases){
-        linearLayoutPast.removeAllViews();
-        for(int i = 0; i<cases.length; i++){
-//            if(cases[i].getState().equals("PAST")){
-                TextView textView = new TextView(this);
-                textView.setBackgroundResource(R.drawable.text_border);
-                textView.setTextSize(24);
-                textView.setGravity(Gravity.CENTER);
-                textView.setText(String.valueOf(cases[i].getId()));
-                linearLayoutPast.addView(textView);
-//            }
-        }
-    }
+//    public void setCaseList(Case[] cases){
+//        linearLayoutPast.removeAllViews();
+//        for(int i = 0; i<cases.length; i++){
+////            if(cases[i].getState().equals("PAST")){
+//                TextView textView = new TextView(this);
+//                textView.setBackgroundResource(R.drawable.text_border);
+//                textView.setTextSize(24);
+//                textView.setGravity(Gravity.CENTER);
+//                textView.setText(String.valueOf(cases[i].getId()));
+//                linearLayoutPast.addView(textView);
+////            }
+//        }
+//    }
 }
