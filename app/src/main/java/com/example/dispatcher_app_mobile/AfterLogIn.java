@@ -27,12 +27,12 @@ import org.json.JSONObject;
 public class AfterLogIn extends AppCompatActivity {
 
     public static AfterLogIn INSTANCE;
-    TextView welcomeText, caseList, newTextView, newCaseTextView;
+    TextView caseList, newTextView, caseName, caseDetails, casePhone, isPatientTextView;
     ImageButton logOutButton, historyButton;
-    Button acceptButton, endButton;
+    Button acceptButton, endButton, mapButton;
     LinearLayout linearLayoutPast, linearLayoutNew;
     String myTeamId, request;
-    protected static Boolean isCase = false;
+    protected static boolean isCase = false;
     Team team;
     Case currCase;
     String[] teamCases;
@@ -49,17 +49,21 @@ public class AfterLogIn extends AppCompatActivity {
         INSTANCE = this;
         Intent intent = getIntent();
         myTeamId = intent.getStringExtra("myTeamId");
-        welcomeText = findViewById(R.id.welcomeText);
+//        welcomeText = findViewById(R.id.welcomeText);
         newTextView = findViewById(R.id.newTextView);
-        newCaseTextView = findViewById(R.id.newCaseTextView);
+        caseName = findViewById(R.id.caseName);
+        casePhone = findViewById(R.id.casePhone);
+        caseDetails = findViewById(R.id.caseDetails);
+        isPatientTextView = findViewById(R.id.isPatientTextView);
 //        caseList = findViewById(R.id.caseList);
-        welcomeText.setText("Welcome " + myTeamId);
+//        welcomeText.setText("Welcome " + myTeamId);
         caseLocation = new Double[2];
         logOutButton = findViewById(R.id.logOutButton);
+        mapButton = findViewById(R.id.mapButton);
         acceptButton = findViewById(R.id.acceptButton);
         historyButton = findViewById(R.id.historyButton);
         endButton = findViewById(R.id.endButton);
-        linearLayoutPast = findViewById(R.id.linearPast);
+//        linearLayoutPast = findViewById(R.id.linearPast);
         linearLayoutNew = findViewById(R.id.linearNew);
 
         getCaseList(true);
@@ -81,9 +85,11 @@ public class AfterLogIn extends AppCompatActivity {
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, object, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        changeCaseState("ONGOING");
                         newTextView.setText("Ongoing");
                         acceptButton.setVisibility(View.INVISIBLE);
                         endButton.setVisibility(View.VISIBLE);
+                        mapButton.setVisibility(View.VISIBLE);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -111,31 +117,17 @@ public class AfterLogIn extends AppCompatActivity {
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.PATCH, url, TeamObject, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        JSONObject CaseObject = new JSONObject();
-                        try {
-                            CaseObject.put("state", "PAST");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        RequestQueue caseQueue = Volley.newRequestQueue(AfterLogIn.this);
-                        String caseUrl = "http://10.0.2.2:8000/cases/"+currCase.getId() + "/";
-                        JsonObjectRequest caseRequest = new JsonObjectRequest(Request.Method.PATCH, caseUrl, CaseObject, new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                newTextView.setText("New Cases");
-                                newCaseTextView.setText("No new cases right now");
-                                acceptButton.setVisibility(View.INVISIBLE);
-                                endButton.setVisibility(View.INVISIBLE);
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.i(TAG, "Error");
-                            }
-                        });
-
-                        caseQueue.add(caseRequest);
+                        changeCaseState("PAST");
+                        newTextView.setText("No new cases right now");
+//                        caseName.setText("No new cases right now");
+                        linearLayoutNew.setVisibility(View.INVISIBLE);
+                        caseName.setText("");
+                        casePhone.setText("");
+                        caseDetails.setText("");
+                        isPatientTextView.setText("");
+                        acceptButton.setVisibility(View.INVISIBLE);
+                        mapButton.setVisibility(View.INVISIBLE);
+                        endButton.setVisibility(View.INVISIBLE);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -157,21 +149,20 @@ public class AfterLogIn extends AppCompatActivity {
             }
         });
 
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(AfterLogIn.this, Map.class);
+                intent.putExtra("myTeamId", myTeamId);
+                intent.putExtra("lat", currCase.getLat());
+                intent.putExtra("lng", currCase.getLng());
+                AfterLogIn.this.startActivity(intent);
+            }
+        });
+
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                JSONObject dummyObject = new JSONObject();
-//                try {
-//                    dummyObject.put("id", myTeamId);
-//                    dummyObject.put("token", "token");
-//                    dummyObject.put("state", "Free");
-//                    dummyObject.put("lat", "0.000000000000000000000000000000");
-//                    dummyObject.put("long", "0.000000000000000000000000000000");
-//                    dummyObject.put("endLat", "0.000000000000000000000000000000");
-//                    dummyObject.put("endLong", "0.000000000000000000000000000000");
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
 
                 RequestQueue queue = Volley.newRequestQueue(AfterLogIn.this);
                 String url = "http://10.0.2.2:8000/teams/"+ myTeamId + "/";
@@ -188,7 +179,7 @@ public class AfterLogIn extends AppCompatActivity {
                             Intent mainIntent = new Intent(AfterLogIn.this, MainActivity.class);
                             AfterLogIn.this.startActivity(mainIntent);
                         }else {
-                            welcomeText.setText("error");
+                            caseName.setText("error");
                         }
                     }
                 });
@@ -216,27 +207,69 @@ public class AfterLogIn extends AppCompatActivity {
 
                 team = gson.fromJson(response.toString(), Team.class);
 
-                if(isOnCreate == false) {
-                    acceptButton.setVisibility(View.VISIBLE);
+                if(!isOnCreate) {
                     currCase = team.getCase((team.getCases().length - 1));
-                    newCaseTextView.setText("Name: " + currCase.getName() +
-                            "\nPhone: " + currCase.getPhone() +
-                            "\nExtra Information: " + currCase.getExtra_information());
+                    if (currCase.getState().equals("TOACCEPT")) {
+                        acceptButton.setVisibility(View.VISIBLE);
+                        endButton.setVisibility(View.INVISIBLE);
+                        mapButton.setVisibility(View.INVISIBLE);
+                    } else if(currCase.getState().equals("ONGOING")) {
+                        acceptButton.setVisibility(View.INVISIBLE);
+                        endButton.setVisibility(View.VISIBLE);
+                        mapButton.setVisibility(View.VISIBLE);
+                    }
+                    linearLayoutNew.setVisibility(View.VISIBLE);
+                    caseName.setText(String.format("%s", currCase.getName()));
+                    casePhone.setText(String.format("%s", currCase.getPhone()));
+                    caseDetails.setText(String.format("%s", currCase.getExtra_information()));
+                    if(currCase.isPatient() == true){
+                        isPatientTextView.setVisibility(View.VISIBLE);
+                        isPatientTextView.setText("Caller is patient");
+                    } else{
+                        isPatientTextView.setVisibility(View.INVISIBLE);
+                    }
                     caseLocation[0] = currCase.getLat();
                     caseLocation[1] = currCase.getLng();
-//                    setCaseList(team.getCases());
-                }else if(isOnCreate == true && team.getCases().length >= 1){
+                }else if(isOnCreate && team.getCases().length >= 1){
                     currCase = team.getCase((team.getCases().length - 1));
-                    if(currCase.getState().equals("ONGOING")){
-                        newCaseTextView.setText("Name: " + currCase.getName() +
-                                "\nPhone: " + currCase.getPhone() +
-                                "\nExtra Information: " + currCase.getExtra_information());
-                        caseLocation[0] = currCase.getLat();
-                        caseLocation[1] = currCase.getLng();
+                    linearLayoutNew.setVisibility(View.VISIBLE);
+                    caseName.setText(String.format("%s", currCase.getName()));
+                    casePhone.setText(String.format("%s", currCase.getPhone()));
+                    caseDetails.setText(String.format("%s", currCase.getExtra_information()));
+                    if(currCase.isPatient() == true){
+                        isPatientTextView.setVisibility(View.VISIBLE);
+                        isPatientTextView.setText("Caller is patient");
+                    }else{
+                        isPatientTextView.setVisibility(View.INVISIBLE);
+                    }
+                    caseLocation[0] = currCase.getLat();
+                    caseLocation[1] = currCase.getLng();
+                    Log.i(TAG, currCase.toString());
+//                    endButton.setVisibility(View.VISIBLE);
+//                    mapButton.setVisibility(View.VISIBLE);
+                    if (currCase.getState().equals("TOACCEPT")) {
+                        acceptButton.setVisibility(View.VISIBLE);
+                        endButton.setVisibility(View.INVISIBLE);
+                        mapButton.setVisibility(View.INVISIBLE);
+                    } else if(currCase.getState().equals("ONGOING")) {
+                        acceptButton.setVisibility(View.INVISIBLE);
                         endButton.setVisibility(View.VISIBLE);
+                        mapButton.setVisibility(View.VISIBLE);
+                    } else if(currCase.getState().equals("PAST")){
+                        newTextView.setText("No new cases right now");
+                        linearLayoutNew.setVisibility(View.INVISIBLE);
+                        caseName.setText("");
+                        casePhone.setText("");
+                        caseDetails.setText("");
+                        isPatientTextView.setText("");
+                        acceptButton.setVisibility(View.INVISIBLE);
+                        mapButton.setVisibility(View.INVISIBLE);
+                        endButton.setVisibility(View.INVISIBLE);
                     }
                 }
             }
+
+
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -247,17 +280,28 @@ public class AfterLogIn extends AppCompatActivity {
         queue.add(request);
     }
 
-//    public void setCaseList(Case[] cases){
-//        linearLayoutPast.removeAllViews();
-//        for(int i = 0; i<cases.length; i++){
-////            if(cases[i].getState().equals("PAST")){
-//                TextView textView = new TextView(this);
-//                textView.setBackgroundResource(R.drawable.text_border);
-//                textView.setTextSize(24);
-//                textView.setGravity(Gravity.CENTER);
-//                textView.setText(String.valueOf(cases[i].getId()));
-//                linearLayoutPast.addView(textView);
-////            }
-//        }
-//    }
+    public void changeCaseState(String state){
+        JSONObject CaseObject = new JSONObject();
+        try {
+            CaseObject.put("state", state);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue caseQueue = Volley.newRequestQueue(AfterLogIn.this);
+        String caseUrl = "http://10.0.2.2:8000/cases/"+ currCase.getId() + "/";
+        JsonObjectRequest caseRequest = new JsonObjectRequest(Request.Method.PATCH, caseUrl, CaseObject, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                currCase.setState(state);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i(TAG, "Error");
+            }
+        });
+
+        caseQueue.add(caseRequest);
+    }
 }

@@ -66,9 +66,9 @@ public class PastCases extends AppCompatActivity {
 //                        if(cases[i].getState().equals("PAST")){
                         TextView textView = new TextView(PastCases.this);
                         textView.setBackgroundResource(R.drawable.text_border);
-                        textView.setTextSize(24);
+                        textView.setTextSize(18);
                         textView.setGravity(Gravity.CENTER);
-                        textView.setText(String.valueOf(team.getCases()[i].getId()));
+                        textView.setText(String.valueOf(team.getCases()[i].toString()));
                         linearLayout.addView(textView);
                     }
                 }

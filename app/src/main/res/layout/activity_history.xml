@@ -6,17 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".PastCases">
 
-    <LinearLayout
-        android:id="@+id/linearLayoutHistory"
-        android:layout_width="match_parent"
-        android:layout_height="429dp"
-        android:orientation="vertical"
+    <ScrollView
+        android:layout_width="380dp"
+        android:layout_height="600dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.735"
-        tools:layout_editor_absoluteX="-1dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutHistory"
+            android:layout_width="380dp"
+            android:layout_height="600dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.454"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.642"></LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/linearLayoutHead"
@@ -33,7 +42,7 @@
             android:layout_height="match_parent"
             android:text="Past Cases"
             android:textAlignment="center"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="3dp"
             android:textSize="32dp"
             android:textColor="@color/black"/>
 
@@ -44,7 +53,7 @@
             android:layout_height="50dp"
             android:layout_gravity="right"
             android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="17dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

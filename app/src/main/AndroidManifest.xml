@@ -8,6 +8,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+    <permission
+        android:name="com.example.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature"/>
+    <uses-permission android:name="com.example.permission.MAPS_RECEIVE"/>
 
     <application
         android:allowBackup="true"
@@ -17,8 +22,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dispatcherappmobile"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PastCases"></activity>
-        <activity android:name=".AfterLogIn"></activity>
+        <activity android:name=".Map"></activity>
+        <activity android:name=".PastCases" />
+        <activity android:name=".AfterLogIn" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBzOB6KfZkSWRTwkvDBn8LYFr9Dt65t7X8" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

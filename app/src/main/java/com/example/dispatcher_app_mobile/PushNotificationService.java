@@ -41,11 +41,12 @@ public class PushNotificationService extends FirebaseMessagingService {
 //    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 //    View view = inflater.inflate(R.layout.activity_after_log_in, (ViewGroup) container, false);
 //    TextView caseList = (TextView) view.findViewById(R.id.textView3);
-    AfterLogIn afterLogIn = AfterLogIn.get();
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        AfterLogIn afterLogIn = AfterLogIn.get();
         String title = remoteMessage.getNotification().getTitle();
         String text = remoteMessage.getNotification().getBody();
         final String CHANNEL_ID = "HEADS_UP_NOTIFICATION";
@@ -61,10 +62,8 @@ public class PushNotificationService extends FirebaseMessagingService {
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setAutoCancel(true);
         NotificationManagerCompat.from(this).notify(1, notification.build());
-        super.onMessageReceived(remoteMessage);
-
         afterLogIn.getCaseList(false);
-
+        super.onMessageReceived(remoteMessage);
     }
 }
 
