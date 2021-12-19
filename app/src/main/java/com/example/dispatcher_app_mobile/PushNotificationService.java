@@ -53,7 +53,7 @@ public class PushNotificationService extends FirebaseMessagingService {
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 "Heads up Notification",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_MAX
         );
         getSystemService(NotificationManager.class).createNotificationChannel(channel);
         Notification.Builder notification = new Notification.Builder(this, CHANNEL_ID)
@@ -63,6 +63,7 @@ public class PushNotificationService extends FirebaseMessagingService {
                 .setAutoCancel(true);
         NotificationManagerCompat.from(this).notify(1, notification.build());
         afterLogIn.getCaseList(false);
+        Log.i(TAG, "received!");
         super.onMessageReceived(remoteMessage);
     }
 }
